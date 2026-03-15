@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amenzou Fitness — Auth</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --red: #e8170f;
+  --red-glow: rgba(232,23,15,0.22);
+  --red-dim: rgba(232,23,15,0.08);
+  --bg: #080808;
+  --bg2: #0f0f0f;
+  --bg3: #141414;
+  --border: rgba(255,255,255,0.07);
+  --border-red: rgba(232,23,15,0.35);
+  --muted: #555;
+  --muted2: #777;
+  --text: #bbb;
+  --white: #efefef;
+}
+
+html, body { height: 100%; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--white);
+  overflow: hidden;
+  cursor: none;
+}
+
+/* CURSOR */
+.cursor       { position:fixed; width:10px; height:10px; background:var(--red); border-radius:50%; pointer-events:none; z-index:9999; transform:translate(-50%,-50%); transition:width .18s,height .18s; }
+.cursor-ring  { position:fixed; width:32px; height:32px; border:1px solid rgba(232,23,15,.45); border-radius:50%; pointer-events:none; z-index:9998; transform:translate(-50%,-50%); }
+body.hovering .cursor { width:18px; height:18px; }
+body.hovering .cursor-ring { width:48px; height:48px; }
+
+/* NOISE */
+body::after {
+  content:''; position:fixed; inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity:.022; pointer-events:none; z-index:8000;
+}
+
+/* LAYOUT */
+.page {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: 100vh;
+}
+
+/* LEFT PANEL */
+.left-panel {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 48px;
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+}
+
+/* Animated red orb */
+.left-panel::before {
+  content: '';
+  position: absolute;
+  top: -20%;
+  left: -20%;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(ellipse at 40% 40%, rgba(232,23,15,0.18) 0%, transparent 65%);
+  animation: orbFloat 8s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+.left-panel::after {
+  content: '';
+  position: absolute;
+  bottom: -10%;
+  right: -10%;
+  width: 60%;
+  height: 60%;
+  background: radial-gradient(ellipse, rgba(232,23,15,0.07) 0%, transparent 65%);
+  animation: orbFloat 11s ease-in-out infinite alternate-reverse;
+  pointer-events: none;
+}
+@keyframes orbFloat {
+  from { transform: translate(0,0) scale(1); }
+  to   { transform: translate(8%,6%) scale(1.08); }
+}
+
+/* Grid overlay */
+.left-grid {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 72px 72px;
+  pointer-events: none;
+}
+
+/* Rotating ring */
+.ring-deco {
+  position: absolute;
+  right: -120px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 500px;
+  height: 500px;
+  border: 1px solid rgba(255,255,255,0.04);
+  border-radius: 50%;
+  animation: spin 50s linear infinite;
+  pointer-events: none;
+}
+.ring-deco::before {
+  content: '';
+  position: absolute;
+  top: 8%;
+  left: 50%;
+  width: 8px; height: 8px;
+  background: var(--red);
+  border-radius: 50%;
+  transform: translate(-50%,-50%);
+  box-shadow: 0 0 18px var(--red);
+}
+.ring-deco-2 {
+  position: absolute;
+  right: -60px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 380px;
+  height: 380px;
+  border: 1px solid rgba(232,23,15,0.08);
+  border-radius: 50%;
+  animation: spin 35s linear infinite reverse;
+  pointer-events: none;
+}
+@keyframes spin { to { transform: translateY(-50%) rotate(360deg); } }
+
+/* LEFT CONTENT */
+.left-logo {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.logo-mark {
+  width: 38px; height: 38px;
+  background: var(--red);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+.logo-text {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 22px;
+  letter-spacing: 3px;
+  color: var(--white);
+}
+.logo-text span { color: var(--red); }
+
+.left-hero {
+  position: relative;
+  z-index: 1;
+}
+.left-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.left-eyebrow::before { content:''; width:20px; height:1px; background:var(--red); display:block; }
+
+.left-title {
+  font-family: 'Bebas Neue', cursive;
+  font-size: clamp(52px, 5.5vw, 82px);
+  line-height: 0.92;
+  letter-spacing: 0px;
+  margin-bottom: 24px;
+}
+.left-title .accent { color: var(--red); }
+.left-title .ghost {
+  -webkit-text-stroke: 1px rgba(255,255,255,0.15);
+  color: transparent;
+}
+
+.left-desc {
+  font-size: 14px;
+  color: var(--muted2);
+  line-height: 1.75;
+  max-width: 340px;
+  margin-bottom: 36px;
+}
+
+.left-stats {
+  display: flex;
+  gap: 32px;
+}
+.ls-item {}
+.ls-num {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 34px;
+  color: var(--white);
+  line-height: 1;
+}
+.ls-num span { color: var(--red); }
+.ls-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+
+.left-footer {
+  position: relative;
+  z-index: 1;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* RIGHT PANEL */
+.right-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  overflow-y: auto;
+  position: relative;
+}
+
+/* Subtle vignette */
+.right-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 80% 20%, rgba(232,23,15,0.04) 0%, transparent 55%);
+  pointer-events: none;
+}
+
+.auth-box {
+  width: 100%;
+  max-width: 420px;
+  position: relative;
+  z-index: 1;
+}
+
+/* TAB SWITCHER */
+.tab-row {
+  display: flex;
+  gap: 0;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 4px;
+  margin-bottom: 36px;
+}
+.tab-btn {
+  flex: 1;
+  padding: 10px;
+  background: none;
+  border: none;
+  border-radius: 7px;
+  color: var(--muted2);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  cursor: none;
+  transition: all 0.25s;
+}
+.tab-btn.active {
+  background: var(--red);
+  color: #fff;
+  box-shadow: 0 4px 20px var(--red-glow);
+}
+
+/* AUTH FORM PANELS */
+.auth-panel { display: none; animation: panelIn 0.4s cubic-bezier(0.22,1,0.36,1) both; }
+.auth-panel.active { display: block; }
+@keyframes panelIn {
+  from { opacity:0; transform:translateY(16px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+.form-heading {
+  margin-bottom: 28px;
+}
+.form-tag {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-bottom: 8px;
+}
+.form-title {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 36px;
+  letter-spacing: 1px;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.form-sub {
+  font-size: 13px;
+  color: var(--muted2);
+  line-height: 1.6;
+}
+
+/* FIELDS */
+.field { margin-bottom: 16px; }
+.field label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 7px;
+}
+.field-wrap { position: relative; }
+.field-wrap .field-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 15px;
+  opacity: 0.4;
+  pointer-events: none;
+}
+.field input {
+  width: 100%;
+  padding: 13px 14px 13px 42px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  color: var(--white);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  cursor: none;
+}
+.field input:focus {
+  outline: none;
+  border-color: var(--border-red);
+  background: rgba(232,23,15,0.03);
+  box-shadow: 0 0 0 3px rgba(232,23,15,0.07);
+}
+.field input::placeholder { color: var(--muted); }
+
+/* PASSWORD TOGGLE */
+.toggle-pw {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: none;
+  font-size: 14px;
+  transition: color 0.2s;
+}
+.toggle-pw:hover { color: var(--white); }
+
+/* DIVIDER */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.divider::before, .divider::after { content:''; flex:1; height:1px; background:var(--border); }
+
+/* REMEMBER / FORGOT ROW */
+.extra-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  font-size: 12px;
+}
+.remember-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted2);
+  cursor: none;
+}
+.remember-check input[type=checkbox] {
+  width: 15px; height: 15px;
+  accent-color: var(--red);
+  cursor: none;
+  padding: 0;
+}
+.forgot-link {
+  color: var(--red);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: none;
+  background: none;
+  border: none;
+  transition: opacity 0.2s;
+}
+.forgot-link:hover { opacity: 0.75; }
+
+/* PASSWORD STRENGTH */
+.pw-strength { margin-top: 8px; display: none; }
+.pw-strength.show { display: block; }
+.pw-bars { display: flex; gap: 4px; margin-bottom: 4px; }
+.pw-bar { flex:1; height:3px; background:var(--border); border-radius:2px; transition:background 0.3s; }
+.pw-bar.weak   { background:#e8170f; }
+.pw-bar.medium { background:#f59e0b; }
+.pw-bar.strong { background:#22c55e; }
+.pw-label { font-size: 11px; color: var(--muted2); }
+
+/* OTP */
+.otp-wrap { margin-bottom: 16px; }
+.otp-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.otp-grid {
+  display: grid;
+  grid-template-columns: repeat(6,1fr);
+  gap: 8px;
+}
+.otp-input {
+  height: 56px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  color: var(--white);
+  font-family: 'Bebas Neue', cursive;
+  font-size: 24px;
+  letter-spacing: 1px;
+  text-align: center;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  cursor: none;
+}
+.otp-input:focus {
+  outline: none;
+  border-color: var(--red);
+  background: var(--red-dim);
+  box-shadow: 0 0 0 3px rgba(232,23,15,0.08);
+}
+
+/* STEP PROGRESS */
+.step-prog {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 28px;
+}
+.sp-dot {
+  flex: 1;
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  transition: background 0.4s;
+}
+.sp-dot.active { background: var(--red); }
+
+/* SUBMIT */
+.submit-btn {
+  width: 100%;
+  padding: 15px;
+  background: var(--red);
+  color: #fff;
+  border: none;
+  border-radius: 9px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+.submit-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.submit-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 36px var(--red-glow); }
+.submit-btn:hover::before { opacity: 1; }
+.submit-btn:disabled { opacity: 0.4; transform: none; box-shadow: none; cursor: not-allowed; }
+
+/* ALERTS */
+.alert {
+  padding: 11px 14px;
+  border-radius: 8px;
+  margin-top: 12px;
+  font-size: 13px;
+  display: none;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+.alert.show { display: flex; }
+.alert.success { background: rgba(34,197,94,0.07); color: #4ade80; border: 1px solid rgba(34,197,94,0.22); }
+.alert.error   { background: rgba(232,23,15,0.07); color: #ff6b6b; border: 1px solid rgba(232,23,15,0.28); }
+.alert.info    { background: rgba(99,179,237,0.07); color: #90cdf4; border: 1px solid rgba(99,179,237,0.22); }
+
+/* RESEND */
+.resend-row { text-align:center; margin-top:14px; font-size:13px; color:var(--muted); }
+.resend-btn { background:none; border:none; color:var(--red); cursor:none; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; transition:opacity .2s; }
+.resend-btn:disabled { opacity:.38; }
+
+/* SUCCESS VIEW */
+.success-view { display:none; text-align:center; padding:10px 0; }
+.success-circle {
+  width:90px; height:90px;
+  background: rgba(34,197,94,0.08);
+  border: 1px solid rgba(34,197,94,0.3);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 40px;
+  margin: 0 auto 24px;
+  animation: popIn 0.5s cubic-bezier(0.22,1,0.36,1);
+}
+@keyframes popIn { from { transform:scale(0.5); opacity:0; } to { transform:scale(1); opacity:1; } }
+.success-title { font-family:'Bebas Neue',cursive; font-size:38px; letter-spacing:2px; margin-bottom:8px; }
+.success-title span { color:var(--red); }
+.success-desc { font-size:14px; color:var(--muted2); line-height:1.7; margin-bottom:28px; }
+
+/* SWITCH LINK */
+.switch-link {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.switch-link button {
+  background: none;
+  border: none;
+  color: var(--red);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: none;
+  transition: opacity 0.2s;
+}
+.switch-link button:hover { opacity: 0.75; }
+
+/* TERMS */
+.terms-note {
+  font-size: 11.5px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin-top: 14px;
+  text-align: center;
+}
+
+/* SPINNER */
+.spinner {
+  width: 14px; height: 14px;
+  border: 2px solid rgba(255,255,255,.25);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin2 .75s linear infinite;
+  display: inline-block;
+}
+@keyframes spin2 { to { transform:rotate(360deg); } }
+
+/* FORGOT PASSWORD OVERLAY */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(8px);
+  z-index: 200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal-box {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 44px;
+  width: 100%;
+  max-width: 400px;
+  animation: panelIn 0.35s cubic-bezier(0.22,1,0.36,1) both;
+}
+.modal-close {
+  position: absolute;
+  top: 16px; right: 20px;
+  background: none; border: none;
+  color: var(--muted); font-size: 20px;
+  cursor: none; transition: color 0.2s;
+}
+.modal-close:hover { color: var(--white); }
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  body { overflow-y: auto; cursor: auto; }
+  .cursor, .cursor-ring { display: none; }
+  .page { grid-template-columns: 1fr; height: auto; }
+  .left-panel { min-height: 240px; padding: 32px; }
+  .left-title { font-size: 52px; }
+  .ring-deco, .ring-deco-2 { display: none; }
+  .right-panel { padding: 32px 24px 48px; }
+  .auth-box { max-width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- FORGOT PASSWORD MODAL -->
+<div class="modal-overlay" id="forgotModal">
+  <div class="modal-box" style="position:relative;">
+    <button class="modal-close" onclick="closeForgot()">✕</button>
+    <div class="form-tag">Account Recovery</div>
+    <div class="form-title" style="margin-bottom:6px;">RESET PASSWORD</div>
+    <p class="form-sub" style="margin-bottom:24px;">Enter your email and we'll send you a verification code to reset your password.</p>
+
+    <div id="fp-step1">
+      <div class="field">
+        <label>Email Address</label>
+        <div class="field-wrap">
+          <span class="field-icon">📧</span>
+          <input type="email" id="fp-email" placeholder="john@example.com">
+        </div>
+      </div>
+      <button class="submit-btn" id="fp-send-btn" onclick="sendFpCode()">
+        <span id="fp-send-label">Send Reset Code</span>
+      </button>
+      <div class="alert" id="fp-alert1"></div>
+    </div>
+
+    <div id="fp-step2" style="display:none;">
+      <p class="form-sub" style="margin-bottom:16px;">Enter the 6-digit code sent to your email.</p>
+      <div class="otp-wrap">
+        <div class="otp-grid">
+          <input class="otp-input" type="text" maxlength="1" id="fpotp0" inputmode="numeric">
+          <input class="otp-input" type="text" maxlength="1" id="fpotp1" inputmode="numeric">
+          <input class="otp-input" type="text" maxlength="1" id="fpotp2" inputmode="numeric">
+          <input class="otp-input" type="text" maxlength="1" id="fpotp3" inputmode="numeric">
+          <input class="otp-input" type="text" maxlength="1" id="fpotp4" inputmode="numeric">
+          <input class="otp-input" type="text" maxlength="1" id="fpotp5" inputmode="numeric">
+        </div>
+      </div>
+      <div class="field" style="margin-top:12px;">
+        <label>New Password</label>
+        <div class="field-wrap">
+          <span class="field-icon">🔒</span>
+          <input type="password" id="fp-newpw" placeholder="New password">
+          <button class="toggle-pw" type="button" onclick="toggleVis('fp-newpw',this)">👁</button>
+        </div>
+      </div>
+      <button class="submit-btn" onclick="verifyFpCode()"><span>Reset Password</span></button>
+      <div class="alert" id="fp-alert2"></div>
+    </div>
+
+    <div id="fp-step3" style="display:none; text-align:center; padding:16px 0;">
+      <div class="success-circle">✓</div>
+      <div class="success-title" style="font-size:28px;">Password <span>Reset!</span></div>
+      <p style="font-size:13px;color:var(--muted2);margin-bottom:20px;">Your password has been updated successfully.</p>
+      <button class="submit-btn" onclick="closeForgot()">Back to Login</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN PAGE -->
+<div class="page">
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <div class="left-grid"></div>
+    <div class="ring-deco"></div>
+    <div class="ring-deco-2"></div>
+
+    <div class="left-logo">
+      <div class="logo-mark">💪</div>
+      <div class="logo-text">AMENZOU&nbsp;<span>FITNESS</span></div>
+    </div>
+
+    <div class="left-hero">
+      <div class="left-eyebrow">Kenitra, Morocco · Est. 2024</div>
+      <div class="left-title">
+        TRAIN<br>
+        <span class="accent">HARD.</span><br>
+        <span class="ghost">STAY</span><br>
+        STRONG.
+      </div>
+      <p class="left-desc">Join hundreds of members transforming their bodies and minds. Your journey starts with a single step.</p>
+      <div class="left-stats">
+        <div class="ls-item">
+          <div class="ls-num">500<span>+</span></div>
+          <div class="ls-label">Members</div>
+        </div>
+        <div class="ls-item">
+          <div class="ls-num">12<span>+</span></div>
+          <div class="ls-label">Trainers</div>
+        </div>
+        <div class="ls-item">
+          <div class="ls-num">4</div>
+          <div class="ls-label">Programs</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="left-footer">© 2026 Amenzou Fitness. All rights reserved.</div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div class="auth-box">
+
+      <!-- TAB ROW -->
+      <div class="tab-row">
+        <button class="tab-btn active" id="tab-login" onclick="switchTab('login')">Login</button>
+        <button class="tab-btn" id="tab-signup" onclick="switchTab('signup')">Sign Up</button>
+      </div>
+
+      <!-- ══════ LOGIN PANEL ══════ -->
+      <div class="auth-panel active" id="panel-login">
+        <div class="form-heading">
+          <div class="form-tag">Welcome Back</div>
+          <div class="form-title">SIGN IN</div>
+          <p class="form-sub">Enter your credentials to access your account.</p>
+        </div>
+
+        <div class="field">
+          <label>Email Address</label>
+          <div class="field-wrap">
+            <span class="field-icon">📧</span>
+            <input type="email" id="li-email" placeholder="john@example.com">
+          </div>
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <div class="field-wrap">
+            <span class="field-icon">🔒</span>
+            <input type="password" id="li-password" placeholder="••••••••">
+            <button class="toggle-pw" type="button" onclick="toggleVis('li-password',this)">👁</button>
+          </div>
+        </div>
+
+        <div class="extra-row">
+          <label class="remember-check">
+            <input type="checkbox" id="li-remember">
+            Remember me
+          </label>
+          <button class="forgot-link" onclick="openForgot()">Forgot password?</button>
+        </div>
+
+        <button class="submit-btn" id="li-btn" onclick="handleLogin()">
+          <span id="li-label">Sign In</span>
+        </button>
+        <div class="alert" id="li-alert"></div>
+
+        <div class="switch-link">
+          Don't have an account?
+          <button onclick="switchTab('signup')">Create one →</button>
+        </div>
+      </div>
+
+      <!-- ══════ SIGNUP PANEL ══════ -->
+      <div class="auth-panel" id="panel-signup">
+
+        <!-- STEP 1: Details -->
+        <div id="su-step1">
+          <div class="step-prog">
+            <div class="sp-dot active" id="su-dot1"></div>
+            <div class="sp-dot" id="su-dot2"></div>
+            <div class="sp-dot" id="su-dot3"></div>
+          </div>
+          <div class="form-heading">
+            <div class="form-tag">Step 1 of 2 — Your Details</div>
+            <div class="form-title">CREATE ACCOUNT</div>
+            <p class="form-sub">Fill in your details and we'll send a verification code.</p>
+          </div>
+
+          <div class="field">
+            <label>Full Name</label>
+            <div class="field-wrap">
+              <span class="field-icon">👤</span>
+              <input type="text" id="su-name" placeholder="John Doe">
+            </div>
+          </div>
+          <div class="field">
+            <label>Email Address</label>
+            <div class="field-wrap">
+              <span class="field-icon">📧</span>
+              <input type="email" id="su-email" placeholder="john@example.com">
+            </div>
+          </div>
+          <div class="field">
+            <label>Password</label>
+            <div class="field-wrap">
+              <span class="field-icon">🔒</span>
+              <input type="password" id="su-password" placeholder="Min. 8 characters" oninput="checkStrength(this.value)">
+              <button class="toggle-pw" type="button" onclick="toggleVis('su-password',this)">👁</button>
+            </div>
+            <div class="pw-strength" id="pw-strength">
+              <div class="pw-bars">
+                <div class="pw-bar" id="pw-b1"></div>
+                <div class="pw-bar" id="pw-b2"></div>
+                <div class="pw-bar" id="pw-b3"></div>
+                <div class="pw-bar" id="pw-b4"></div>
+              </div>
+              <div class="pw-label" id="pw-label">Weak</div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Confirm Password</label>
+            <div class="field-wrap">
+              <span class="field-icon">🔒</span>
+              <input type="password" id="su-confirm" placeholder="Repeat password">
+              <button class="toggle-pw" type="button" onclick="toggleVis('su-confirm',this)">👁</button>
+            </div>
+          </div>
+
+          <button class="submit-btn" id="su-btn1" onclick="sendSignupCode()">
+            <span id="su-label1">Send Verification Code</span>
+          </button>
+          <div class="alert" id="su-alert1"></div>
+
+          <p class="terms-note">By signing up you agree to our <span style="color:var(--red);">Terms of Service</span> & <span style="color:var(--red);">Privacy Policy</span>.</p>
+
+          <div class="switch-link" style="margin-top:16px;">
+            Already have an account?
+            <button onclick="switchTab('login')">Sign in →</button>
+          </div>
+        </div>
+
+        <!-- STEP 2: OTP -->
+        <div id="su-step2" style="display:none;">
+          <div class="step-prog">
+            <div class="sp-dot active" id="su-dot1b"></div>
+            <div class="sp-dot active" id="su-dot2b"></div>
+            <div class="sp-dot" id="su-dot3b"></div>
+          </div>
+          <div class="form-heading">
+            <div class="form-tag">Step 2 of 2 — Verify Email</div>
+            <div class="form-title">CHECK YOUR INBOX</div>
+            <p class="form-sub" id="su-otp-desc">We sent a 6-digit code to your email. Enter it below.</p>
+          </div>
+
+          <div class="otp-wrap">
+            <div class="otp-label">Verification Code</div>
+            <div class="otp-grid">
+              <input class="otp-input" type="text" maxlength="1" id="suotp0" inputmode="numeric">
+              <input class="otp-input" type="text" maxlength="1" id="suotp1" inputmode="numeric">
+              <input class="otp-input" type="text" maxlength="1" id="suotp2" inputmode="numeric">
+              <input class="otp-input" type="text" maxlength="1" id="suotp3" inputmode="numeric">
+              <input class="otp-input" type="text" maxlength="1" id="suotp4" inputmode="numeric">
+              <input class="otp-input" type="text" maxlength="1" id="suotp5" inputmode="numeric">
+            </div>
+          </div>
+
+          <button class="submit-btn" id="su-btn2" onclick="verifySignupCode()">
+            <span id="su-label2">Verify & Create Account</span>
+          </button>
+          <div class="alert" id="su-alert2"></div>
+
+          <div class="resend-row">
+            <span>Didn't get it? </span>
+            <button class="resend-btn" id="su-resend-btn" onclick="resendSignupCode()" disabled>
+              <span id="su-resend-label">Resend in 30s</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 3: Success -->
+        <div class="success-view" id="su-step3">
+          <div class="success-circle">✓</div>
+          <div class="success-title">WELCOME <span>ABOARD!</span></div>
+          <p class="success-desc">Your account has been created and email verified. You're now part of Amenzou Fitness!</p>
+          <button class="submit-btn" onclick="switchTab('login')">Go to Login →</button>
+        </div>
+
+      </div>
+      <!-- end signup panel -->
+
+    </div><!-- auth-box -->
+  </div><!-- right-panel -->
+</div><!-- page -->
+
+<script>
+/* ── CURSOR ── */
+const cur = document.getElementById('cursor');
+const rin = document.getElementById('cursorRing');
+let rx=0,ry=0,mx=0,my=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px';});
+(function animR(){rx+=(mx-rx)*.13;ry+=(my-ry)*.13;rin.style.left=rx+'px';rin.style.top=ry+'px';requestAnimationFrame(animR);})();
+document.querySelectorAll('button,input,a,label').forEach(el=>{
+  el.addEventListener('mouseenter',()=>document.body.classList.add('hovering'));
+  el.addEventListener('mouseleave',()=>document.body.classList.remove('hovering'));
+});
+
+/* ── EMAILJS CONFIG — untouched ── */
+const EMAILJS_SERVICE_ID  = 'service_2ae7lf3';
+const EMAILJS_TEMPLATE_ID = 'template_soemquh';
+const EMAILJS_PUBLIC_KEY  = '1g_I4DUvoU3ELEurt';
+try {
+  if (typeof emailjs !== 'undefined' && EMAILJS_PUBLIC_KEY !== 'YOUR_PUBLIC_KEY')
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+} catch(e){ console.error(e); }
+
+/* ── STATE ── */
+let suCode='', fpCode='', suResendTimer=null, suResendSec=30;
+let fpEmail='';
+
+/* ── TAB SWITCH ── */
+function switchTab(tab){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.auth-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  document.getElementById('panel-'+tab).classList.add('active');
+}
+
+/* ── HELPERS ── */
+function sa(id,msg,type){ const e=document.getElementById(id); e.textContent=msg; e.className='alert '+type+' show'; }
+function ha(id){ document.getElementById(id).className='alert'; }
+function genCode(){ return Math.floor(100000+Math.random()*900000).toString(); }
+function toggleVis(id,btn){ const i=document.getElementById(id); i.type=i.type==='password'?'text':'password'; btn.textContent=i.type==='password'?'👁':'🙈'; }
+function setLoading(btnId,labelId,loading,labelText){
+  const b=document.getElementById(btnId);
+  b.disabled=loading;
+  document.getElementById(labelId).innerHTML=loading?'<span class="spinner"></span>':labelText;
+}
+
+/* ── PASSWORD STRENGTH ── */
+function checkStrength(val){
+  const el=document.getElementById('pw-strength');
+  const lbl=document.getElementById('pw-label');
+  const bars=[document.getElementById('pw-b1'),document.getElementById('pw-b2'),document.getElementById('pw-b3'),document.getElementById('pw-b4')];
+  if(!val){ el.classList.remove('show'); return; }
+  el.classList.add('show');
+  let score=0;
+  if(val.length>=8) score++;
+  if(/[A-Z]/.test(val)) score++;
+  if(/[0-9]/.test(val)) score++;
+  if(/[^A-Za-z0-9]/.test(val)) score++;
+  const cls=['','weak','medium','medium','strong'];
+  const labels=['','Weak','Fair','Good','Strong'];
+  bars.forEach((b,i)=>{ b.className='pw-bar'; if(i<score) b.classList.add(cls[score]); });
+  lbl.textContent=labels[score]||'Weak';
+  lbl.style.color=score<=1?'#e8170f':score<=2?'#f59e0b':'#22c55e';
+}
+
+/* ── LOGIN ── */
+function handleLogin(){
+  const email=document.getElementById('li-email').value.trim();
+  const pw=document.getElementById('li-password').value;
+  ha('li-alert');
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ sa('li-alert','Please enter a valid email address.','error'); return; }
+  if(pw.length<6){ sa('li-alert','Password must be at least 6 characters.','error'); return; }
+  setLoading('li-btn','li-label',true,'Sign In');
+  // Simulate login (replace with real auth)
+  setTimeout(()=>{
+    setLoading('li-btn','li-label',false,'Sign In');
+    sa('li-alert','Login successful! Redirecting…','success');
+    setTimeout(()=>{ ha('li-alert'); }, 3000);
+  },1800);
+}
+
+/* ── SIGNUP: SEND CODE ── */
+async function sendSignupCode(){
+  const name=document.getElementById('su-name').value.trim();
+  const email=document.getElementById('su-email').value.trim();
+  const pw=document.getElementById('su-password').value;
+  const cpw=document.getElementById('su-confirm').value;
+  ha('su-alert1');
+  if(name.length<2){ sa('su-alert1','Please enter your full name.','error'); return; }
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ sa('su-alert1','Please enter a valid email address.','error'); return; }
+  if(pw.length<8){ sa('su-alert1','Password must be at least 8 characters.','error'); return; }
+  if(pw!==cpw){ sa('su-alert1','Passwords do not match.','error'); return; }
+  if(EMAILJS_SERVICE_ID==='YOUR_SERVICE_ID'){ sa('su-alert1','EmailJS not configured.','error'); return; }
+  setLoading('su-btn1','su-label1',true,'Sending…');
+  suCode=genCode();
+  try{
+    await emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_TEMPLATE_ID,{
+      to_name:name, to_email:email, otp_code:suCode, gym_name:'Amenzou Fitness'
+    });
+    document.getElementById('su-otp-desc').textContent='We sent a 6-digit code to '+email+'. Enter it below.';
+    document.getElementById('su-step1').style.display='none';
+    document.getElementById('su-step2').style.display='block';
+    sa('su-alert2','Code sent! Check your inbox.','success');
+    initOtp('suotp',6); document.getElementById('suotp0').focus();
+    startSuTimer();
+  } catch(err){
+    sa('su-alert1','Failed to send code. Try again.','error');
+  }
+  setLoading('su-btn1','su-label1',false,'Send Verification Code');
+}
+
+/* ── SIGNUP: VERIFY ── */
+function verifySignupCode(){
+  let entered='';
+  for(let i=0;i<6;i++) entered+=document.getElementById('suotp'+i).value;
+  if(entered.length<6){ sa('su-alert2','Please fill in all 6 digits.','error'); return; }
+  if(entered!==suCode){ sa('su-alert2','Incorrect code. Try again.','error'); return; }
+  clearInterval(suResendTimer);
+  document.getElementById('su-step2').style.display='none';
+  document.getElementById('su-step3').style.display='block';
+}
+
+/* ── SIGNUP: RESEND ── */
+async function resendSignupCode(){
+  const btn=document.getElementById('su-resend-btn');
+  btn.disabled=true;
+  suCode=genCode();
+  const name=document.getElementById('su-name').value.trim();
+  const email=document.getElementById('su-email').value.trim();
+  try{
+    await emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_TEMPLATE_ID,{to_name:name,to_email:email,otp_code:suCode,gym_name:'Amenzou Fitness'});
+    sa('su-alert2','Code resent! Check your inbox.','success');
+    for(let i=0;i<6;i++) document.getElementById('suotp'+i).value='';
+    document.getElementById('suotp0').focus();
+    startSuTimer();
+  } catch(e){
+    sa('su-alert2','Failed to resend. Try again.','error');
+    btn.disabled=false;
+  }
+}
+
+function startSuTimer(){
+  suResendSec=30;
+  const btn=document.getElementById('su-resend-btn');
+  const lbl=document.getElementById('su-resend-label');
+  btn.disabled=true;
+  clearInterval(suResendTimer);
+  suResendTimer=setInterval(()=>{
+    suResendSec--;
+    lbl.textContent='Resend in '+suResendSec+'s';
+    if(suResendSec<=0){ clearInterval(suResendTimer); btn.disabled=false; lbl.textContent='Resend Code'; }
+  },1000);
+}
+
+/* ── FORGOT PASSWORD ── */
+function openForgot(){ document.getElementById('forgotModal').classList.add('open'); }
+function closeForgot(){
+  document.getElementById('forgotModal').classList.remove('open');
+  document.getElementById('fp-step1').style.display='block';
+  document.getElementById('fp-step2').style.display='none';
+  document.getElementById('fp-step3').style.display='none';
+  document.getElementById('fp-email').value='';
+  document.getElementById('fp-newpw').value='';
+  for(let i=0;i<6;i++) document.getElementById('fpotp'+i).value='';
+  ha('fp-alert1'); ha('fp-alert2');
+}
+async function sendFpCode(){
+  const email=document.getElementById('fp-email').value.trim();
+  ha('fp-alert1');
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ sa('fp-alert1','Please enter a valid email address.','error'); return; }
+  const btn=document.getElementById('fp-send-btn');
+  const lbl=document.getElementById('fp-send-label');
+  btn.disabled=true; lbl.innerHTML='<span class="spinner"></span>';
+  fpCode=genCode(); fpEmail=email;
+  try{
+    await emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_TEMPLATE_ID,{to_name:'Member',to_email:email,otp_code:fpCode,gym_name:'Amenzou Fitness'});
+    document.getElementById('fp-step1').style.display='none';
+    document.getElementById('fp-step2').style.display='block';
+    initOtp('fpotp',6);
+    document.getElementById('fpotp0').focus();
+    sa('fp-alert2','Code sent! Check your inbox.','success');
+  } catch(e){
+    sa('fp-alert1','Failed to send code.','error');
+  }
+  btn.disabled=false; lbl.textContent='Send Reset Code';
+}
+function verifyFpCode(){
+  let entered='';
+  for(let i=0;i<6;i++) entered+=document.getElementById('fpotp'+i).value;
+  const newpw=document.getElementById('fp-newpw').value;
+  if(entered.length<6){ sa('fp-alert2','Please fill in all 6 digits.','error'); return; }
+  if(entered!==fpCode){ sa('fp-alert2','Incorrect code. Try again.','error'); return; }
+  if(newpw.length<8){ sa('fp-alert2','Password must be at least 8 characters.','error'); return; }
+  document.getElementById('fp-step2').style.display='none';
+  document.getElementById('fp-step3').style.display='block';
+}
+
+/* ── OTP KEYBOARD NAV ── */
+function initOtp(prefix,count){
+  for(let i=0;i<count;i++){
+    const c=document.getElementById(prefix+i);
+    c.value='';
+    c.oninput=e=>{ const v=e.target.value.replace(/\D/g,''); e.target.value=v; if(v&&i<count-1) document.getElementById(prefix+(i+1)).focus(); };
+    c.onkeydown=e=>{ if(e.key==='Backspace'&&!c.value&&i>0) document.getElementById(prefix+(i-1)).focus(); };
+  }
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  initOtp('suotp',6);
+  initOtp('fpotp',6);
+});
+</script>
+</body>
+</html>
