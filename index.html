@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amenzou Fitness</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --red: #e8170f;
+  --red-glow: rgba(232,23,15,0.25);
+  --red-dim: rgba(232,23,15,0.08);
+  --bg: #080808;
+  --bg2: #0f0f0f;
+  --border: rgba(255,255,255,0.06);
+  --muted: #555;
+  --text: #d8d8d8;
+  --white: #f0f0f0;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--white);
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* CUSTOM CURSOR */
+.cursor {
+  position: fixed;
+  width: 12px;
+  height: 12px;
+  background: var(--red);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: width 0.2s, height 0.2s, opacity 0.2s;
+  mix-blend-mode: normal;
+}
+.cursor-ring {
+  position: fixed;
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(232,23,15,0.5);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  transform: translate(-50%, -50%);
+  transition: transform 0.12s ease-out, width 0.2s, height 0.2s;
+}
+body:hover .cursor { opacity: 1; }
+
+/* NOISE OVERLAY */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+  opacity: 0.025;
+  pointer-events: none;
+  z-index: 9000;
+}
+
+/* AMBIENT LIGHT */
+.ambient {
+  position: fixed;
+  top: -30vh;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 900px;
+  height: 600px;
+  background: radial-gradient(ellipse, rgba(232,23,15,0.12) 0%, transparent 65%);
+  pointer-events: none;
+  z-index: 0;
+  animation: ambientPulse 6s ease-in-out infinite alternate;
+}
+@keyframes ambientPulse {
+  from { opacity: 0.6; transform: translateX(-50%) scale(1); }
+  to   { opacity: 1; transform: translateX(-50%) scale(1.1); }
+}
+
+/* HEADER */
+header {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 100;
+  padding: 0 48px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(8,8,8,0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+
+.logo {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 24px;
+  letter-spacing: 3px;
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.logo span { color: var(--red); }
+
+.logo-mark {
+  width: 32px;
+  height: 32px;
+  background: var(--red);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  border-radius: 6px;
+}
+
+nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+nav button {
+  background: none;
+  border: none;
+  color: var(--muted);
+  padding: 8px 16px;
+  cursor: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  border-radius: 6px;
+  transition: color 0.2s, background 0.2s;
+  text-transform: uppercase;
+}
+nav button:hover { color: var(--white); background: rgba(255,255,255,0.04); }
+nav button.active { color: var(--white); }
+
+.header-right { display: flex; align-items: center; gap: 12px; }
+
+.lang-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 7px 14px;
+  border-radius: 6px;
+  cursor: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: all 0.2s;
+}
+.lang-btn:hover { border-color: var(--red); color: var(--red); }
+
+.header-cta {
+  background: var(--red);
+  color: white;
+  border: none;
+  padding: 9px 20px;
+  border-radius: 6px;
+  cursor: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  transition: all 0.2s;
+}
+.header-cta:hover { background: #ff2218; transform: translateY(-1px); box-shadow: 0 4px 20px var(--red-glow); }
+
+/* SECTIONS */
+.section {
+  min-height: 100vh;
+  padding: 72px 48px 80px;
+  position: relative;
+  z-index: 1;
+  display: none;
+}
+.section.active-section {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  animation: sectionIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes sectionIn {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---- HERO ---- */
+#home {
+  align-items: flex-start;
+  padding-top: 140px;
+  padding-bottom: 100px;
+  overflow: hidden;
+}
+
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-bottom: 24px;
+  opacity: 0;
+  animation: fadeUp 0.6s 0.1s forwards;
+}
+.hero-eyebrow::before {
+  content: '';
+  display: block;
+  width: 24px;
+  height: 1px;
+  background: var(--red);
+}
+
+.hero-headline {
+  font-family: 'Bebas Neue', cursive;
+  font-size: clamp(72px, 11vw, 148px);
+  line-height: 0.92;
+  letter-spacing: -1px;
+  margin-bottom: 36px;
+  opacity: 0;
+  animation: fadeUp 0.7s 0.2s forwards;
+}
+.hero-headline .line2 { color: var(--red); display: block; }
+.hero-headline .outlined {
+  -webkit-text-stroke: 1px rgba(255,255,255,0.2);
+  color: transparent;
+}
+
+.hero-sub {
+  font-size: 16px;
+  color: var(--muted);
+  max-width: 420px;
+  line-height: 1.7;
+  margin-bottom: 44px;
+  font-weight: 400;
+  opacity: 0;
+  animation: fadeUp 0.7s 0.3s forwards;
+}
+
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  opacity: 0;
+  animation: fadeUp 0.7s 0.4s forwards;
+}
+
+.btn-primary {
+  background: var(--red);
+  color: white;
+  border: none;
+  padding: 16px 36px;
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: none;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.12);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.btn-primary:hover { transform: translateY(-3px); box-shadow: 0 12px 40px var(--red-glow); }
+.btn-primary:hover::after { opacity: 1; }
+
+.btn-ghost {
+  background: none;
+  color: var(--muted);
+  border: none;
+  padding: 16px 0;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: none;
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.btn-ghost:hover { color: var(--white); }
+.btn-ghost-arrow { transition: transform 0.2s; }
+.btn-ghost:hover .btn-ghost-arrow { transform: translateX(4px); }
+
+.hero-stats {
+  display: flex;
+  gap: 48px;
+  margin-top: 80px;
+  padding-top: 48px;
+  border-top: 1px solid var(--border);
+  opacity: 0;
+  animation: fadeUp 0.7s 0.5s forwards;
+}
+.stat-number {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 48px;
+  color: var(--white);
+  line-height: 1;
+  letter-spacing: 1px;
+}
+.stat-number span { color: var(--red); }
+.stat-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+
+.hero-deco {
+  position: absolute;
+  right: -60px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 620px;
+  height: 620px;
+  border: 1px solid rgba(255,255,255,0.04);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: rotateSlow 40s linear infinite;
+}
+.hero-deco::before {
+  content: '';
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  background: var(--red);
+  border-radius: 50%;
+  transform: translate(-50%,-50%);
+  box-shadow: 0 0 20px var(--red);
+}
+.hero-deco-inner {
+  position: absolute;
+  inset: 60px;
+  border: 1px solid rgba(255,255,255,0.03);
+  border-radius: 50%;
+  animation: rotateSlow 30s linear infinite reverse;
+}
+@keyframes rotateSlow { to { transform: translateY(-50%) rotate(360deg); } }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---- PROGRAMS ---- */
+#programs { justify-content: flex-start; padding-top: 120px; }
+
+.section-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-label::before {
+  content: '';
+  width: 20px;
+  height: 1px;
+  background: var(--red);
+}
+
+.section-title {
+  font-family: 'Bebas Neue', cursive;
+  font-size: clamp(44px, 7vw, 80px);
+  line-height: 1;
+  letter-spacing: 1px;
+  margin-bottom: 56px;
+}
+.section-title .hl { color: var(--red); }
+
+.programs-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.program-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 36px 28px;
+  transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  cursor: none;
+  position: relative;
+  overflow: hidden;
+}
+.program-card::before {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--red);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s ease;
+}
+.program-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(232,23,15,0.3);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.5), 0 0 40px var(--red-dim);
+}
+.program-card:hover::before { transform: scaleX(1); }
+
+.program-num {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 56px;
+  color: rgba(255,255,255,0.04);
+  line-height: 1;
+  margin-bottom: 20px;
+  transition: color 0.3s;
+}
+.program-card:hover .program-num { color: var(--red-dim); }
+
+.program-icon {
+  font-size: 28px;
+  margin-bottom: 16px;
+}
+.program-title {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 22px;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+.program-desc {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+/* ---- PRICING ---- */
+#pricing { justify-content: flex-start; padding-top: 120px; }
+
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.plan-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 44px 36px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.35s;
+  cursor: none;
+}
+.plan-card:hover { transform: translateY(-6px); box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+
+.plan-card.featured {
+  border-color: rgba(232,23,15,0.5);
+  background: linear-gradient(160deg, rgba(232,23,15,0.06) 0%, var(--bg2) 50%);
+}
+.plan-card.featured:hover { box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 60px var(--red-dim); }
+
+.plan-badge {
+  display: none;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: var(--red);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+.plan-card.featured .plan-badge { display: block; }
+
+.plan-name {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+
+.plan-price {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+.price-currency { font-size: 22px; color: var(--red); font-weight: 700; }
+.price-amount {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 72px;
+  color: var(--white);
+  line-height: 1;
+  letter-spacing: -1px;
+}
+.price-period { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+
+.plan-divider {
+  height: 1px;
+  background: var(--border);
+  margin-bottom: 28px;
+}
+
+.plan-features {
+  list-style: none;
+  margin-bottom: 36px;
+}
+.plan-features li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  font-size: 14px;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+}
+.plan-features li:last-child { border-bottom: none; }
+.plan-features li::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: var(--red);
+  border-radius: 50%;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.plan-btn {
+  width: 100%;
+  padding: 15px;
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: none;
+  transition: all 0.3s;
+  border: 1px solid rgba(232,23,15,0.4);
+  background: transparent;
+  color: var(--red);
+}
+.plan-btn:hover, .plan-card.featured .plan-btn {
+  background: var(--red);
+  border-color: var(--red);
+  color: white;
+  box-shadow: 0 8px 30px var(--red-glow);
+}
+
+/* ---- CONTACT ---- */
+#contact { padding-top: 120px; }
+
+.contact-layout {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 80px;
+  align-items: start;
+}
+
+.contact-side {}
+
+.contact-headline {
+  font-family: 'Bebas Neue', cursive;
+  font-size: clamp(48px, 7vw, 76px);
+  line-height: 1;
+  letter-spacing: 1px;
+  margin-bottom: 32px;
+}
+.contact-headline .hl { color: var(--red); }
+
+.contact-desc { font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 44px; }
+
+.contact-detail {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+}
+.contact-detail:first-of-type { border-top: 1px solid var(--border); }
+
+.ci {
+  width: 44px;
+  height: 44px;
+  background: var(--red-dim);
+  border: 1px solid rgba(232,23,15,0.2);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.contact-detail-text { font-size: 14px; color: var(--text); }
+.contact-detail-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
+
+/* SIGNUP FORM CARD */
+.signup-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 48px;
+}
+
+.progress-track {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 40px;
+}
+.prog-dot {
+  flex: 1;
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  transition: background 0.4s;
+}
+.prog-dot.active { background: var(--red); }
+
+.step-tag {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-bottom: 10px;
+}
+.step-title {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 32px;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+.step-desc {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 28px;
+  line-height: 1.6;
+}
+
+.form-field { margin-bottom: 18px; }
+.form-field label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.form-field input {
+  width: 100%;
+  padding: 14px 16px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--white);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  transition: border-color 0.2s;
+  cursor: none;
+}
+.form-field input:focus {
+  outline: none;
+  border-color: rgba(232,23,15,0.5);
+  background: rgba(232,23,15,0.02);
+}
+.form-field input::placeholder { color: var(--muted); }
+
+/* OTP */
+.otp-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.otp-input {
+  height: 58px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--white);
+  font-family: 'Bebas Neue', cursive;
+  font-size: 26px;
+  letter-spacing: 2px;
+  text-align: center;
+  transition: border-color 0.2s, background 0.2s;
+  cursor: none;
+}
+.otp-input:focus {
+  outline: none;
+  border-color: var(--red);
+  background: var(--red-dim);
+}
+
+/* SUBMIT BTN */
+.submit-btn {
+  width: 100%;
+  padding: 16px;
+  background: var(--red);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: none;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.submit-btn:hover { background: #ff2218; box-shadow: 0 10px 40px var(--red-glow); transform: translateY(-2px); }
+.submit-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+
+/* ALERTS */
+.alert {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-top: 14px;
+  font-size: 13px;
+  display: none;
+  font-weight: 500;
+}
+.alert.show { display: flex; align-items: center; gap: 8px; }
+.alert.success { background: rgba(34,197,94,0.08); color: #4ade80; border: 1px solid rgba(34,197,94,0.25); }
+.alert.error { background: rgba(232,23,15,0.08); color: #ff6b6b; border: 1px solid rgba(232,23,15,0.3); }
+
+/* SUCCESS */
+.success-view {
+  text-align: center;
+  padding: 20px 0;
+  display: none;
+}
+.success-circle {
+  width: 88px;
+  height: 88px;
+  background: rgba(34,197,94,0.08);
+  border: 1px solid rgba(34,197,94,0.3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 38px;
+  margin: 0 auto 24px;
+}
+.success-title {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 36px;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+.success-title span { color: var(--red); }
+.success-desc { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+/* RESEND */
+.resend-row {
+  text-align: center;
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.resend-btn {
+  background: none;
+  border: none;
+  color: var(--red);
+  cursor: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  transition: opacity 0.2s;
+}
+.resend-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* SPINNER */
+.spinner {
+  width: 15px;
+  height: 15px;
+  border: 2px solid rgba(255,255,255,0.25);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+  display: inline-block;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* FOOTER */
+footer {
+  position: relative;
+  z-index: 1;
+  padding: 28px 48px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--muted);
+}
+.footer-logo { font-family: 'Bebas Neue', cursive; font-size: 16px; letter-spacing: 3px; color: rgba(255,255,255,0.3); }
+
+/* MOBILE MENU */
+.menu-btn {
+  display: none;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  width: 36px;
+  height: 36px;
+  cursor: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.menu-btn span {
+  display: block;
+  width: 16px;
+  height: 1.5px;
+  background: var(--white);
+  border-radius: 2px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 1024px) {
+  .programs-grid { grid-template-columns: repeat(2, 1fr); }
+  .hero-deco { display: none; }
+}
+@media (max-width: 768px) {
+  header { padding: 0 20px; }
+  .section { padding: 80px 20px 60px; }
+  .hero-headline { font-size: clamp(56px, 15vw, 90px); }
+  nav { display: none; }
+  nav.open { display: flex; flex-direction: column; position: absolute; top: 72px; left: 0; width: 100%; background: rgba(8,8,8,0.97); padding: 16px; border-bottom: 1px solid var(--border); }
+  .menu-btn { display: flex; }
+  .header-cta { display: none; }
+  .programs-grid { grid-template-columns: 1fr; }
+  .pricing-grid { grid-template-columns: 1fr; }
+  .contact-layout { grid-template-columns: 1fr; gap: 40px; }
+  .signup-card { padding: 28px; }
+  .hero-stats { flex-direction: column; gap: 24px; }
+  footer { flex-direction: column; gap: 8px; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- CURSOR -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- AMBIENT -->
+<div class="ambient"></div>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-mark">💪</div>
+    <span>AMENZOU</span>&nbsp;<span>FITNESS</span>
+  </div>
+
+  <nav id="main-nav">
+    <button onclick="showSection('home')" id="nav-home" class="active">Home</button>
+    <button onclick="showSection('programs')" id="nav-programs">Programs</button>
+    <button onclick="showSection('pricing')" id="nav-pricing">Pricing</button>
+    <button onclick="showSection('contact')" id="nav-contact">Contact</button>
+  </nav>
+
+  <div class="header-right">
+    <button class="lang-btn" onclick="toggleLanguage()" id="lang-btn">AR</button>
+    <button class="header-cta" onclick="showSection('contact')">Join Now</button>
+    <button class="menu-btn" onclick="document.getElementById('main-nav').classList.toggle('open')">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<!-- HOME -->
+<section id="home" class="section active-section">
+  <div class="hero-eyebrow">Kenitra, Morocco · Est. 2024</div>
+  <h1 class="hero-headline" id="hero-title">
+    TRAIN HARD.<br>
+    <span class="line2">STAY STRONG.</span>
+  </h1>
+  <p class="hero-sub" id="hero-text">Welcome to Amenzou Fitness. Your transformation starts today.</p>
+  <div class="hero-actions">
+    <button class="btn-primary" onclick="showSection('contact')" id="hero-cta">Join Now</button>
+    <button class="btn-ghost" onclick="showSection('programs')">
+      Explore Programs
+      <span class="btn-ghost-arrow">→</span>
+    </button>
+  </div>
+  <div class="hero-stats">
+    <div>
+      <div class="stat-number">500<span>+</span></div>
+      <div class="stat-label">Active Members</div>
+    </div>
+    <div>
+      <div class="stat-number">12<span>+</span></div>
+      <div class="stat-label">Expert Trainers</div>
+    </div>
+    <div>
+      <div class="stat-number">4</div>
+      <div class="stat-label">Programs</div>
+    </div>
+  </div>
+  <div class="hero-deco">
+    <div class="hero-deco-inner"></div>
+  </div>
+</section>
+
+<!-- PROGRAMS -->
+<section id="programs" class="section">
+  <div class="section-label">What We Offer</div>
+  <h2 class="section-title" id="programs-title">OUR <span class="hl">PROGRAMS</span></h2>
+  <div class="programs-grid">
+    <div class="program-card">
+      <div class="program-num">01</div>
+      <div class="program-icon">💪</div>
+      <div class="program-title" id="p1">Bodybuilding</div>
+      <p class="program-desc" id="p1d">Sculpt your physique with structured strength programs.</p>
+    </div>
+    <div class="program-card">
+      <div class="program-num">02</div>
+      <div class="program-icon">🔥</div>
+      <div class="program-title" id="p2">CrossFit</div>
+      <p class="program-desc" id="p2d">Push your limits with functional high-intensity training.</p>
+    </div>
+    <div class="program-card">
+      <div class="program-num">03</div>
+      <div class="program-icon">🏃</div>
+      <div class="program-title" id="p3">Cardio</div>
+      <p class="program-desc" id="p3d">Boost endurance, burn fat and improve heart health.</p>
+    </div>
+    <div class="program-card">
+      <div class="program-num">04</div>
+      <div class="program-icon">🥗</div>
+      <div class="program-title" id="p4">Nutrition</div>
+      <p class="program-desc" id="p4d">Custom meal plans to fuel your performance and recovery.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing" class="section">
+  <div class="section-label">Membership</div>
+  <h2 class="section-title" id="pricing-title">MEMBERSHIP <span class="hl">PLANS</span></h2>
+  <div class="pricing-grid">
+    <!-- BASIC -->
+    <div class="plan-card">
+      <p class="plan-name" id="plan1">BASIC</p>
+      <div class="plan-price">
+        <span class="price-currency">$</span>
+        <span class="price-amount">25</span>
+      </div>
+      <p class="price-period">/month</p>
+      <div class="plan-divider"></div>
+      <ul class="plan-features">
+        <li id="pf1-1">Gym Access</li>
+        <li id="pf1-2">Locker Room</li>
+        <li id="pf1-3">2 Classes/Week</li>
+      </ul>
+      <button class="plan-btn" onclick="showSection('contact')"><span id="pbtn">GET STARTED</span></button>
+    </div>
+    <!-- STANDARD (FEATURED) -->
+    <div class="plan-card featured">
+      <div class="plan-badge">Most Popular</div>
+      <p class="plan-name" id="plan2">STANDARD</p>
+      <div class="plan-price">
+        <span class="price-currency">$</span>
+        <span class="price-amount">40</span>
+      </div>
+      <p class="price-period">/month</p>
+      <div class="plan-divider"></div>
+      <ul class="plan-features">
+        <li id="pf2-1">Unlimited Access</li>
+        <li id="pf2-2">All Classes</li>
+        <li id="pf2-3">1 PT Session/Month</li>
+        <li id="pf2-4">Nutrition Guide</li>
+      </ul>
+      <button class="plan-btn" onclick="showSection('contact')">GET STARTED</button>
+    </div>
+    <!-- PREMIUM -->
+    <div class="plan-card">
+      <p class="plan-name" id="plan3">PREMIUM</p>
+      <div class="plan-price">
+        <span class="price-currency">$</span>
+        <span class="price-amount">60</span>
+      </div>
+      <p class="price-period">/month</p>
+      <div class="plan-divider"></div>
+      <ul class="plan-features">
+        <li id="pf3-1">Everything in Standard</li>
+        <li id="pf3-2">4 PT Sessions/Month</li>
+        <li id="pf3-3">Custom Meal Plan</li>
+        <li id="pf3-4">Priority Booking</li>
+      </ul>
+      <button class="plan-btn" onclick="showSection('contact')">GET STARTED</button>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" class="section">
+  <div class="contact-layout">
+    <div class="contact-side">
+      <div class="section-label">Get Started</div>
+      <h2 class="contact-headline">
+        <span id="ch1">JOIN</span> <span class="hl" id="ch2">US</span><br>
+        <span id="ch3">TODAY</span>
+      </h2>
+      <p class="contact-desc" id="cdesc">Sign up and we'll verify your email instantly. Your fitness journey begins here.</p>
+      <div class="contact-detail">
+        <div class="ci">📧</div>
+        <div>
+          <div class="contact-detail-label">Email</div>
+          <div class="contact-detail-text">info@amenzou.fitness</div>
+        </div>
+      </div>
+      <div class="contact-detail">
+        <div class="ci">📞</div>
+        <div>
+          <div class="contact-detail-label">Phone</div>
+          <div class="contact-detail-text">+212 600 000 000</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="signup-card">
+      <div class="progress-track">
+        <div class="prog-dot active" id="dot1"></div>
+        <div class="prog-dot" id="dot2"></div>
+        <div class="prog-dot" id="dot3"></div>
+      </div>
+
+      <!-- STEP 1 -->
+      <div id="step1">
+        <div class="step-tag">Step 1 of 2</div>
+        <div class="step-title"><span class="hl" id="s1t">SIGN UP</span></div>
+        <p class="step-desc" id="s1d">Enter your details to receive your verification code.</p>
+        <div class="form-field">
+          <label id="ln">Full Name</label>
+          <input type="text" id="inp-name" placeholder="John Doe">
+        </div>
+        <div class="form-field">
+          <label id="le">Email Address</label>
+          <input type="email" id="inp-email" placeholder="john@example.com">
+        </div>
+        <button class="submit-btn" id="btn-send" onclick="sendCode()">
+          <span id="bst">Send Verification Code</span>
+        </button>
+        <div class="alert" id="alert1"></div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div id="step2" style="display:none;">
+        <div class="step-tag">Step 2 of 2</div>
+        <div class="step-title"><span class="hl" id="s2t">VERIFY CODE</span></div>
+        <p class="step-desc" id="s2d">Enter the 6-digit code sent to your email.</p>
+        <div class="otp-grid">
+          <input class="otp-input" type="text" maxlength="1" id="otp0" inputmode="numeric">
+          <input class="otp-input" type="text" maxlength="1" id="otp1" inputmode="numeric">
+          <input class="otp-input" type="text" maxlength="1" id="otp2" inputmode="numeric">
+          <input class="otp-input" type="text" maxlength="1" id="otp3" inputmode="numeric">
+          <input class="otp-input" type="text" maxlength="1" id="otp4" inputmode="numeric">
+          <input class="otp-input" type="text" maxlength="1" id="otp5" inputmode="numeric">
+        </div>
+        <button class="submit-btn" id="btn-verify" onclick="verifyCode()">
+          <span id="bvt">Verify & Complete</span>
+        </button>
+        <div class="alert" id="alert2"></div>
+        <div class="resend-row">
+          <span id="rl">Didn't get it? </span>
+          <button class="resend-btn" id="resend-btn" onclick="resendCode()" disabled>
+            <span id="rt">Resend in 30s</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="success-view" id="step3">
+        <div class="success-circle">✓</div>
+        <div class="success-title"><span id="s3t">WELCOME</span> ABOARD!</div>
+        <p class="success-desc" id="s3d">Your email has been verified. You're now part of Amenzou Fitness!</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span class="footer-logo">AMENZOU FITNESS</span>
+  <span id="footer">© 2026 Amenzou Fitness. All rights reserved.</span>
+</footer>
+
+<script>
+// CURSOR
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+let rx = 0, ry = 0, mx = 0, my = 0;
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; cursor.style.left = mx + 'px'; cursor.style.top = my + 'px'; });
+(function animRing() {
+  rx += (mx - rx) * 0.14;
+  ry += (my - ry) *.14;
+  ring.style.left = rx + 'px';
+  ring.style.top = ry + 'px';
+  requestAnimationFrame(animRing);
+})();
+document.querySelectorAll('button, a, input').forEach(el => {
+  el.addEventListener('mouseenter', () => { cursor.style.width = '20px'; cursor.style.height = '20px'; ring.style.width = '52px'; ring.style.height = '52px'; });
+  el.addEventListener('mouseleave', () => { cursor.style.width = '12px'; cursor.style.height = '12px'; ring.style.width = '36px'; ring.style.height = '36px'; });
+});
+
+// STATE
+let currentLang = localStorage.getItem('lang') || 'en';
+let generatedCode = '';
+let resendTimer = null;
+let resendSeconds = 30;
+let currentName = '';
+let currentEmail = '';
+
+// EMAILJS CONFIG — untouched
+const EMAILJS_SERVICE_ID = 'service_2ae7lf3';
+const EMAILJS_TEMPLATE_ID = 'template_soemquh';
+const EMAILJS_PUBLIC_KEY = '1g_I4DUvoU3ELEurt';
+
+let emailjsConfigured = false;
+try {
+  if (EMAILJS_PUBLIC_KEY !== 'YOUR_PUBLIC_KEY' && typeof emailjs !== 'undefined') {
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+    emailjsConfigured = true;
+  }
+} catch(err) { console.error('EmailJS error:', err); }
+
+// NAVIGATION
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active-section'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active-section');
+  document.getElementById('nav-' + id).classList.add('active');
+  window.scrollTo(0, 0);
+  document.getElementById('main-nav').classList.remove('open');
+}
+
+function toggleLanguage() {
+  currentLang = currentLang === 'en' ? 'ar' : currentLang === 'ar' ? 'fr' : 'en';
+  applyLanguage();
+}
+
+// TRANSLATIONS
+const t = {
+  en: {
+    langBtn:'AR', navHome:'Home', navPrograms:'Programs', navPricing:'Pricing', navContact:'Contact',
+    heroTitle:'TRAIN HARD.<br><span class="line2">STAY STRONG.</span>', heroText:'Welcome to Amenzou Fitness. Your transformation starts today.', heroCta:'JOIN NOW',
+    programsTitle:'OUR <span class="hl">PROGRAMS</span>',
+    p1:'Bodybuilding', p1d:'Sculpt your physique with structured strength programs.',
+    p2:'CrossFit', p2d:'Push your limits with functional high-intensity training.',
+    p3:'Cardio', p3d:'Boost endurance, burn fat and improve heart health.',
+    p4:'Nutrition', p4d:'Custom meal plans to fuel your performance and recovery.',
+    pricingTitle:'MEMBERSHIP <span class="hl">PLANS</span>',
+    plan1:'BASIC', plan2:'STANDARD', plan3:'PREMIUM',
+    pf1:['Gym Access','Locker Room','2 Classes/Week'],
+    pf2:['Unlimited Access','All Classes','1 PT Session/Month','Nutrition Guide'],
+    pf3:['Everything in Standard','4 PT Sessions/Month','Custom Meal Plan','Priority Booking'],
+    pbtn:'GET STARTED',
+    ch1:'JOIN', ch2:'US', ch3:'TODAY', cdesc:'Sign up and we\'ll verify your email instantly. Your fitness journey begins here.',
+    s1t:'SIGN UP', s1d:'Enter your details to receive your verification code.', ln:'Full Name', le:'Email Address',
+    bst:'Send Verification Code', bsting:'Sending...',
+    s2t:'VERIFY CODE', s2d:'Enter the 6-digit code sent to your email.',
+    bvt:'Verify & Complete', bvting:'Verifying...',
+    s3t:'WELCOME', s3d:'Your email has been verified. You\'re now part of Amenzou Fitness!',
+    rl:'Didn\'t get it? ', rt:'Resend in {s}s', rtn:'Resend Code',
+    errName:'Please enter your full name.', errEmail:'Please enter a valid email address.',
+    errConfig:'EmailJS not configured yet.', errSend:'Failed to send code.', infoSent:'Code sent! Check your inbox.',
+    errCode:'Please fill in all 6 digits.', errWrong:'Incorrect code. Try again.',
+    footer:'© 2026 Amenzou Fitness. All rights reserved.'
+  },
+  ar: {
+    langBtn:'FR', navHome:'الرئيسية', navPrograms:'البرامج', navPricing:'الأسعار', navContact:'اتصل',
+    heroTitle:'تدرّب بقوة.<br><span class="line2">وابقَ قويًا.</span>', heroText:'مرحبًا بكم في أمينزو فيتنس. رحلتك تبدأ اليوم.', heroCta:'انضم الآن',
+    programsTitle:'<span class="hl">برامجنا</span>',
+    p1:'بناء الجسم', p1d:'انحت جسمك مع برامج القوة المنظمة.',
+    p2:'كروس فيت', p2d:'تجاوز حدودك مع التدريب الوظيفي.',
+    p3:'كارديو', p3d:'تحسين التحمل وحرق الدهون.',
+    p4:'التغذية', p4d:'خطط وجبات مخصصة.',
+    pricingTitle:'<span class="hl">خطط</span> الاشتراك',
+    plan1:'أساسي', plan2:'معياري', plan3:'بريميوم',
+    pf1:['دخول الصالة','غرفة التخزين','حصتان أسبوعياً'],
+    pf2:['وصول غير محدود','جميع الحصص','جلسة تدريب','دليل التغذية'],
+    pf3:['كل شيء في المعياري','4 جلسات تدريب','خطة وجبات','حجز أولوية'],
+    pbtn:'ابدأ الآن',
+    ch1:'انضم', ch2:'إلينا', ch3:'اليوم', cdesc:'سجل وسنتحقق من بريدك فورًا.',
+    s1t:'التسجيل', s1d:'أدخل بياناتك لتلقي رمز التحقق.', ln:'الاسم الكامل', le:'البريد الإلكتروني',
+    bst:'إرسال رمز التحقق', bsting:'جارٍ الإرسال...',
+    s2t:'رمز التحقق', s2d:'أدخل الرمز المكوّن من 6 أرقام.',
+    bvt:'تحقق وأكمل', bvting:'جارٍ التحقق...',
+    s3t:'أهلاً', s3d:'تم التحقق من بريدك الإلكتروني!',
+    rl:'لم تستلمه؟ ', rt:'إعادة الإرسال خلال {s}ث', rtn:'إعادة إرسال',
+    errName:'الرجاء إدخال اسمك الكامل.', errEmail:'الرجاء إدخال بريد إلكتروني صالح.',
+    errConfig:'لم يتم إعداد EmailJS بعد.', errSend:'فشل إرسال الرمز.', infoSent:'تم إرسال الرمز!',
+    errCode:'الرجاء ملء جميع الأرقام.', errWrong:'الرمز غير صحيح.',
+    footer:'© 2026 أمينزو فيتنس'
+  },
+  fr: {
+    langBtn:'EN', navHome:'Accueil', navPrograms:'Programmes', navPricing:'Tarifs', navContact:'Contact',
+    heroTitle:'ENTRAÎNEZ-VOUS DUR.<br><span class="line2">RESTEZ FORT.</span>', heroText:'Bienvenue à Amenzou Fitness. Votre transformation commence aujourd\'hui.', heroCta:'REJOINDRE',
+    programsTitle:'NOS <span class="hl">PROGRAMMES</span>',
+    p1:'Musculation', p1d:'Sculptez votre physique.',
+    p2:'CrossFit', p2d:'Dépassez vos limites.',
+    p3:'Cardio', p3d:'Améliorez l\'endurance.',
+    p4:'Nutrition', p4d:'Plans de repas personnalisés.',
+    pricingTitle:'PLANS <span class="hl">D\'ABONNEMENT</span>',
+    plan1:'BASIQUE', plan2:'STANDARD', plan3:'PREMIUM',
+    pf1:['Accès Salle','Vestiaires','2 Cours/Semaine'],
+    pf2:['Accès Illimité','Tous les Cours','1 Séance PT','Guide Nutrition'],
+    pf3:['Tout du Standard','4 Séances PT','Plan Repas','Réservation Prioritaire'],
+    pbtn:'COMMENCER',
+    ch1:'REJOIGNEZ', ch2:'NOUS', ch3:'AUJOURD\'HUI', cdesc:'Inscrivez-vous et nous vérifierons votre email.',
+    s1t:'S\'INSCRIRE', s1d:'Entrez vos informations.', ln:'Nom Complet', le:'Adresse E-Mail',
+    bst:'Envoyer le Code', bsting:'Envoi...',
+    s2t:'CODE', s2d:'Entrez le code à 6 chiffres.',
+    bvt:'Vérifier', bvting:'Vérification...',
+    s3t:'BIENVENUE', s3d:'Votre e-mail a été vérifié!',
+    rl:'Pas reçu? ', rt:'Renvoyer dans {s}s', rtn:'Renvoyer',
+    errName:'Veuillez entrer votre nom.', errEmail:'Veuillez entrer une adresse e-mail valide.',
+    errConfig:'EmailJS non configuré.', errSend:'Échec de l\'envoi.', infoSent:'Code envoyé!',
+    errCode:'Veuillez remplir les 6 chiffres.', errWrong:'Code incorrect.',
+    footer:'© 2026 Amenzou Fitness'
+  }
+};
+
+function getLang() { return t[currentLang]; }
+
+function applyLanguage() {
+  const l = getLang();
+  document.body.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+  document.getElementById('lang-btn').innerText = l.langBtn;
+  document.getElementById('nav-home').innerText = l.navHome;
+  document.getElementById('nav-programs').innerText = l.navPrograms;
+  document.getElementById('nav-pricing').innerText = l.navPricing;
+  document.getElementById('nav-contact').innerText = l.navContact;
+  document.getElementById('hero-title').innerHTML = l.heroTitle;
+  document.getElementById('hero-text').innerText = l.heroText;
+  document.getElementById('hero-cta').innerText = l.heroCta;
+  document.getElementById('programs-title').innerHTML = l.programsTitle;
+  document.getElementById('p1').innerText = l.p1; document.getElementById('p1d').innerText = l.p1d;
+  document.getElementById('p2').innerText = l.p2; document.getElementById('p2d').innerText = l.p2d;
+  document.getElementById('p3').innerText = l.p3; document.getElementById('p3d').innerText = l.p3d;
+  document.getElementById('p4').innerText = l.p4; document.getElementById('p4d').innerText = l.p4d;
+  document.getElementById('pricing-title').innerHTML = l.pricingTitle;
+  document.getElementById('plan1').innerText = l.plan1;
+  document.getElementById('plan2').innerText = l.plan2;
+  document.getElementById('plan3').innerText = l.plan3;
+  l.pf1.forEach((v,i) => { const el = document.getElementById(`pf1-${i+1}`); if(el) el.innerText = v; });
+  l.pf2.forEach((v,i) => { const el = document.getElementById(`pf2-${i+1}`); if(el) el.innerText = v; });
+  l.pf3.forEach((v,i) => { const el = document.getElementById(`pf3-${i+1}`); if(el) el.innerText = v; });
+  document.getElementById('ch1').innerText = l.ch1;
+  document.getElementById('ch2').innerText = l.ch2;
+  document.getElementById('ch3').innerText = l.ch3;
+  document.getElementById('cdesc').innerText = l.cdesc;
+  document.getElementById('s1t').innerText = l.s1t;
+  document.getElementById('s1d').innerText = l.s1d;
+  document.getElementById('ln').innerText = l.ln;
+  document.getElementById('le').innerText = l.le;
+  document.getElementById('bst').innerText = l.bst;
+  document.getElementById('s2t').innerText = l.s2t;
+  document.getElementById('s2d').innerText = l.s2d;
+  document.getElementById('bvt').innerText = l.bvt;
+  document.getElementById('s3t').innerText = l.s3t;
+  document.getElementById('s3d').innerText = l.s3d;
+  document.getElementById('rl').innerText = l.rl;
+  document.getElementById('footer').innerText = l.footer;
+  localStorage.setItem('lang', currentLang);
+}
+
+// HELPERS
+function generateCode() { return Math.floor(100000 + Math.random() * 900000).toString(); }
+function showAlert(id, msg, type) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.className = 'alert ' + type + ' show';
+}
+function hideAlert(id) { document.getElementById(id).className = 'alert'; }
+
+// OTP NAVIGATION
+document.addEventListener('DOMContentLoaded', () => {
+  for (let i = 0; i < 6; i++) {
+    const cell = document.getElementById('otp' + i);
+    cell.addEventListener('input', e => {
+      const val = e.target.value.replace(/\D/g,'');
+      e.target.value = val;
+      if (val && i < 5) document.getElementById('otp' + (i+1)).focus();
+    });
+    cell.addEventListener('keydown', e => {
+      if (e.key === 'Backspace' && !cell.value && i > 0) document.getElementById('otp' + (i-1)).focus();
+    });
+  }
+  applyLanguage();
+});
+
+// SEND CODE
+async function sendCode() {
+  const l = getLang();
+  const name = document.getElementById('inp-name').value.trim();
+  const email = document.getElementById('inp-email').value.trim();
+  if (name.length < 2) { showAlert('alert1', l.errName, 'error'); return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showAlert('alert1', l.errEmail, 'error'); return; }
+  if (EMAILJS_SERVICE_ID === 'YOUR_SERVICE_ID') { showAlert('alert1', l.errConfig, 'error'); return; }
+  hideAlert('alert1');
+  const btn = document.getElementById('btn-send');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>' + l.bsting;
+  generatedCode = generateCode();
+  currentName = name;
+  currentEmail = email;
+  try {
+    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+      to_name: name, to_email: email, otp_code: generatedCode, gym_name: 'Amenzou Fitness'
+    });
+    document.getElementById('step1').style.display = 'none';
+    document.getElementById('step2').style.display = 'block';
+    document.getElementById('dot1').classList.remove('active');
+    document.getElementById('dot2').classList.add('active');
+    showAlert('alert2', l.infoSent, 'success');
+    document.getElementById('otp0').focus();
+    startResendTimer();
+  } catch(err) {
+    showAlert('alert1', l.errSend, 'error');
+    btn.disabled = false;
+    btn.innerHTML = '<span id="bst">' + l.bst + '</span>';
+  }
+}
+
+// VERIFY
+function verifyCode() {
+  const l = getLang();
+  let entered = '';
+  for (let i = 0; i < 6; i++) entered += document.getElementById('otp' + i).value;
+  if (entered.length < 6) { showAlert('alert2', l.errCode, 'error'); return; }
+  if (entered !== generatedCode) { showAlert('alert2', l.errWrong, 'error'); return; }
+  clearInterval(resendTimer);
+  document.getElementById('step2').style.display = 'none';
+  document.getElementById('step3').style.display = 'block';
+  document.getElementById('dot2').classList.remove('active');
+  document.getElementById('dot3').classList.add('active');
+}
+
+// RESEND
+async function resendCode() {
+  const l = getLang();
+  const btn = document.getElementById('resend-btn');
+  btn.disabled = true;
+  generatedCode = generateCode();
+  try {
+    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+      to_name: currentName, to_email: currentEmail, otp_code: generatedCode, gym_name: 'Amenzou Fitness'
+    });
+    showAlert('alert2', l.infoSent, 'success');
+    for (let i = 0; i < 6; i++) document.getElementById('otp' + i).value = '';
+    document.getElementById('otp0').focus();
+    startResendTimer();
+  } catch(err) {
+    showAlert('alert2', l.errSend, 'error');
+    btn.disabled = false;
+  }
+}
+
+function startResendTimer() {
+  resendSeconds = 30;
+  const btn = document.getElementById('resend-btn');
+  const span = document.getElementById('rt');
+  btn.disabled = true;
+  clearInterval(resendTimer);
+  resendTimer = setInterval(() => {
+    resendSeconds--;
+    const l = getLang();
+    span.textContent = l.rt.replace('{s}', resendSeconds);
+    if (resendSeconds <= 0) {
+      clearInterval(resendTimer);
+      btn.disabled = false;
+      span.textContent = l.rtn;
+    }
+  }, 1000);
+}
+</script>
+</body>
+</html>
